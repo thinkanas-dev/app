@@ -51,6 +51,7 @@ export async function updateSession(request: NextRequest) {
       ? new URL("/objectifs/aujourdhui", request.url)
       : new URL("/acces?retour=%2Fobjectifs", request.url);
     const redirection = NextResponse.redirect(destination);
+    redirection.headers.set("Cache-Control", "no-store, max-age=0");
     response.cookies.getAll().forEach((cookie) => redirection.cookies.set(cookie));
     return redirection;
   }
