@@ -1,0 +1,36 @@
+{
+  "name": "think.anas",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "desktop": "electron desktop/main.mjs",
+    "desktop:icon": "node desktop/generate-icon.mjs",
+    "desktop:launcher": "powershell -NoProfile -ExecutionPolicy Bypass -File desktop/build-launcher.ps1",
+    "desktop:brand": "node desktop/brand-electron.mjs",
+    "desktop:install": "npm run desktop:icon && npm run desktop:launcher && npm run desktop:brand && powershell -NoProfile -ExecutionPolicy Bypass -File desktop/install-windows-shortcuts.ps1"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2.117.2",
+    "next": "16.3.4",
+    "pdfjs-dist": "^6.3.289",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "electron": "^44.3.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "rcedit": "^5.0.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

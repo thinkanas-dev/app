@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="fond" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f7dda7"/>
+      <stop offset="0.52" stop-color="#dfb66f"/>
+      <stop offset="1" stop-color="#b9782f"/>
+    </linearGradient>
+    <linearGradient id="ruban" x1="62" y1="118" x2="194" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#10192f"/>
+      <stop offset="0.5" stop-color="#071126"/>
+      <stop offset="1" stop-color="#020817"/>
+    </linearGradient>
+    <linearGradient id="pli" x1="95" y1="120" x2="110" y2="182" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#694018"/>
+      <stop offset="0.6" stop-color="#9b6224"/>
+      <stop offset="1" stop-color="#d6a354"/>
+    </linearGradient>
+    <linearGradient id="boucle" x1="70" y1="150" x2="150" y2="216" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#10192f"/>
+      <stop offset="0.55" stop-color="#081126"/>
+      <stop offset="1" stop-color="#020817"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="58" fill="url(#fond)"/>
+  <!-- Le « t » plié du mot-symbole think.anas -->
+  <path d="M63 146 L116 181 C131 187 149 190 172 189 C177 189 178 192 175 195 C164 208 147 216 128 216 C90 216 63 190 63 160 Z" fill="url(#boucle)"/>
+  <path d="M110 120 L113.5 118.5 L113.5 177.5 C113.5 180 114.5 181 116.5 181.5 L63 147 C72 137 89 129 110 120 Z" fill="url(#pli)"/>
+  <path d="M179 43 L90 84 C74 92 63 103 63 120 L63 146 C70 137 88 128 110 119 L180 88 C189 83 193 76 193 67 L193 55 C193 45 186 40 179 43 Z" fill="url(#ruban)"/>
+</svg>
