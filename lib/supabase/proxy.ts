@@ -46,6 +46,15 @@ export async function updateSession(request: NextRequest) {
   const connecte = Boolean(claims?.sub && methodeForte);
   const chemin = request.nextUrl.pathname;
 
+  if (chemin === "/") {
+    const destination = connecte
+      ? new URL("/objectifs/aujourdhui", request.url)
+      : new URL("/acces?retour=%2Fobjectifs", request.url);
+    const redirection = NextResponse.redirect(destination);
+    response.cookies.getAll().forEach((cookie) => redirection.cookies.set(cookie));
+    return redirection;
+  }
+
   if (!connecte && chemin.startsWith("/api/")) {
     const refus = NextResponse.json({ erreur: "Vérification biométrique requise." }, { status: 401 });
     response.cookies.getAll().forEach((cookie) => refus.cookies.set(cookie));
