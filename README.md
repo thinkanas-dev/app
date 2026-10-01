@@ -2,7 +2,7 @@
 
 Application personnelle pour piloter le quotidien : objectifs, études, tâches, habitudes, agenda, finances, santé, notes, navigateur à intention et automatisations. L’espace privé utilise Supabase avec RLS et un passkey WebAuthn (Windows Hello, Touch ID, Face ID ou clé de sécurité).
 
-La version web cible `https://thinkanas.com`. La version Electron conserve aussi une sauvegarde automatique locale et reste active dans la zone de notification pour les rappels.
+La version web cible `https://ouroboros.thinkanas.com`. La version Electron conserve aussi une sauvegarde automatique locale et reste active dans la zone de notification pour les rappels.
 
 Voir [DEPLOIEMENT.md](./DEPLOIEMENT.md) pour Supabase, Vercel et le domaine.
 

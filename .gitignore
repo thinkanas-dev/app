@@ -44,3 +44,5 @@ next-env.d.ts
 # local launch/session artifacts
 *.lnk
 .claude/*.lock
+/supabase/.temp/
+/.supabase-home/

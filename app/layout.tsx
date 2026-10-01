@@ -5,7 +5,7 @@ import { ServiceWorkerRegistration } from "@/components/ServiceWorkerRegistratio
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://thinkanas.com"),
+  metadataBase: new URL("https://ouroboros.thinkanas.com"),
   title: "think.anas",
   applicationName: "think.anas",
   description: "Tableau de bord personnel pour les études, les objectifs, les finances et la santé.",

@@ -1,13 +1,13 @@
 project_id = "appthinkanas"
 
 [auth]
-site_url = "https://thinkanas.com"
-additional_redirect_urls = ["https://thinkanas.com/acces"]
+site_url = "https://ouroboros.thinkanas.com"
+additional_redirect_urls = ["http://127.0.0.1:8000", "https://edtechversion.vercel.app", "https://ouroboros.thinkanas.com/acces"]
 
 [auth.passkey]
 enabled = true
 
 [auth.webauthn]
 rp_display_name = "think.anas"
-rp_id = "thinkanas.com"
-rp_origins = ["https://thinkanas.com"]
+rp_id = "ouroboros.thinkanas.com"
+rp_origins = ["https://ouroboros.thinkanas.com"]

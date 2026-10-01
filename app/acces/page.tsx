@@ -70,7 +70,7 @@ export default function AccesPage() {
       resultat = await supabase.auth.signUp({
         email,
         password: motDePasse,
-        options: { emailRedirectTo: "https://thinkanas.com/acces" },
+        options: { emailRedirectTo: "https://ouroboros.thinkanas.com/acces" },
       });
     }
     if (resultat.error) {
@@ -114,7 +114,7 @@ export default function AccesPage() {
             </>
           )}
           {message && <p role="status" className="mt-4 rounded-md bg-panel px-3 py-2 font-sans text-sm text-ink">{message}</p>}
-          <p className="mt-6 text-center font-sans text-[11px] text-text-muted">Domaine officiel : thinkanas.com</p>
+          <p className="mt-6 text-center font-sans text-[11px] text-text-muted">Domaine officiel : ouroboros.thinkanas.com</p>
         </section>
       </div>
     </main>

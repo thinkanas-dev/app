@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const PRIVE = "/objectifs";
 const ACCES = "/acces";
-const DOMAINE_PUBLIC = "thinkanas.com";
+const DOMAINE_PUBLIC = "ouroboros.thinkanas.com";
 
 export async function updateSession(request: NextRequest) {
   const host = request.headers.get("host")?.split(":")[0] ?? "";
