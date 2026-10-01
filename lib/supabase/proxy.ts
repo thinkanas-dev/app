@@ -18,6 +18,9 @@ export async function updateSession(request: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) {
+    if (process.env.NODE_ENV === "production" && request.nextUrl.pathname.startsWith("/api/")) {
+      return NextResponse.json({ erreur: "Configuration de sécurité requise." }, { status: 503 });
+    }
     if (process.env.NODE_ENV === "production" && request.nextUrl.pathname.startsWith(PRIVE)) {
       return NextResponse.redirect(new URL(`${ACCES}?configuration=requise`, request.url));
     }
@@ -42,6 +45,12 @@ export async function updateSession(request: NextRequest) {
   const methodeForte = claims?.amr?.some(({ method }) => method === "passkey" || method === "webauthn") ?? false;
   const connecte = Boolean(claims?.sub && methodeForte);
   const chemin = request.nextUrl.pathname;
+
+  if (!connecte && chemin.startsWith("/api/")) {
+    const refus = NextResponse.json({ erreur: "Vérification biométrique requise." }, { status: 401 });
+    response.cookies.getAll().forEach((cookie) => refus.cookies.set(cookie));
+    return refus;
+  }
 
   if (!connecte && chemin.startsWith(PRIVE)) {
     const destination = new URL(ACCES, request.url);
