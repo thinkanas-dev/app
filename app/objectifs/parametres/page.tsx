@@ -7,6 +7,7 @@ import { InstagramIcon, TikTokIcon, LinkedInIcon } from "@/components/brand-icon
 import { useObjectifsState } from "@/lib/objectifs-store";
 import { creerSauvegarde, lireSauvegarde, telechargerSauvegarde } from "@/lib/backup";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { enregistrerWindowsHello } from "@/lib/platform-passkeys";
 
 /** Recadre au centre et compresse la photo avant stockage local */
 function resizeImage(file: File, target = 320): Promise<string> {
@@ -143,8 +144,8 @@ export default function ParametresPage() {
     const supabase = createSupabaseBrowserClient();
     if (!supabase) return setBackupStatus("Supabase n’est pas encore configuré.");
     setBusy(true);
-    const { data, error } = await supabase.auth.registerPasskey();
-    setBackupStatus(error ? error.message : `Nouvel accès biométrique ajouté${data?.friendly_name ? ` : ${data.friendly_name}` : "."}`);
+    const { error } = await enregistrerWindowsHello(supabase);
+    setBackupStatus(error ? error.message : "Nouvel accès Windows Hello ajouté.");
     setBusy(false);
   }
 
@@ -283,7 +284,7 @@ export default function ParametresPage() {
 
       <div className="rounded-lg border border-hairline bg-canvas p-5">
         <h2 className="font-sans font-semibold text-base text-ink mb-1">Sécurité biométrique</h2>
-        <p className="font-sans text-sm text-text-muted mb-4">Ajoutez un autre appareil avec Windows Hello, Touch ID, Face ID ou une clé de sécurité. Verrouiller exige une nouvelle vérification.</p>
+        <p className="font-sans text-sm text-text-muted mb-4">Ajoutez le capteur biométrique intégré de cet ordinateur avec Windows Hello. Verrouiller exige une nouvelle vérification.</p>
         <div className="flex gap-2 flex-wrap">
           <button type="button" disabled={busy} onClick={() => void ajouterEmpreinte()} className="rounded-md bg-brand px-4 py-2 font-sans text-sm font-medium text-canvas disabled:opacity-60">Ajouter une empreinte</button>
           <button type="button" onClick={() => void verrouiller()} className="rounded-md border border-hairline px-4 py-2 font-sans text-sm text-text-muted hover:text-ink">Verrouiller maintenant</button>

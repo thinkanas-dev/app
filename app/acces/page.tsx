@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient, supabaseConfigure } from "@/lib/supabase/client";
+import { enregistrerWindowsHello, ouvrirAvecWindowsHello } from "@/lib/platform-passkeys";
 
 const champ = "w-full rounded-md border border-hairline bg-canvas px-3 py-2.5 font-sans text-sm text-ink outline-none focus:border-brand";
 
@@ -28,10 +29,10 @@ export default function AccesPage() {
   async function ouvrirAvecEmpreinte() {
     const supabase = createSupabaseBrowserClient();
     if (!supabase) return setMessage("La sécurité cloud doit d’abord être reliée à Supabase.");
-    if (!("PublicKeyCredential" in window)) return setMessage("Cet appareil ne prend pas en charge Windows Hello, Touch ID ou les clés de sécurité.");
+    if (!("PublicKeyCredential" in window)) return setMessage("Cet appareil ne prend pas en charge Windows Hello.");
     setEnCours(true);
     setMessage("");
-    const { error } = await supabase.auth.signInWithPasskey();
+    const { error } = await ouvrirAvecWindowsHello(supabase);
     if (error) {
       setMessage(error.message);
       setEnCours(false);
@@ -46,7 +47,7 @@ export default function AccesPage() {
     if (!supabase) return;
     setEnCours(true);
     setMessage("");
-    const { error } = await supabase.auth.registerPasskey();
+    const { error } = await enregistrerWindowsHello(supabase);
     if (error) {
       setMessage(error.message);
       setEnCours(false);
@@ -96,7 +97,7 @@ export default function AccesPage() {
             <div><p className="font-serif text-2xl">think.anas</p><p className="font-sans text-xs text-text-muted">Espace personnel chiffré en transit</p></div>
           </div>
           <h1 className="mt-8 font-serif text-3xl">Votre empreinte ouvre l’app</h1>
-          <p className="mt-2 font-sans text-sm leading-6 text-text-muted">Windows Hello, Touch ID, Face ID, le code de l’appareil ou une clé de sécurité peuvent confirmer votre identité.</p>
+          <p className="mt-2 font-sans text-sm leading-6 text-text-muted">Le capteur d’empreinte Dell de cet ordinateur confirme votre identité avec Windows Hello.</p>
 
           {!configure ? <div className="mt-6 rounded-md border border-amber-400/50 bg-amber-50 p-3 font-sans text-sm text-amber-900">Configuration Supabase requise sur le déploiement Vercel.</div> : sessionInitiale ? (
             <button type="button" disabled={enCours} onClick={enregistrerEmpreinte} className="mt-7 w-full rounded-md bg-brand px-4 py-3 font-sans text-sm font-semibold text-canvas disabled:opacity-50">Enregistrer l’empreinte de cet appareil</button>
