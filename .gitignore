@@ -46,3 +46,4 @@ next-env.d.ts
 .claude/*.lock
 /supabase/.temp/
 /.supabase-home/
+/tmp/

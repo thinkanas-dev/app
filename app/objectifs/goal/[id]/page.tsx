@@ -10,6 +10,7 @@ import { GoalIcon } from "@/components/GoalIcon";
 import { ProgressRing } from "@/components/ProgressRing";
 import { StatusBadge } from "@/components/StatusBadge";
 import { GoalNotes } from "@/components/GoalNotes";
+import { HistoireMarocBook } from "@/components/HistoireMarocBook";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { InstagramIcon, TikTokIcon, LinkedInIcon } from "@/components/brand-icons";
 import { daysUntil } from "@/components/Countdown";
@@ -107,7 +108,7 @@ export default function GoalDossierPage() {
       : 0;
   const pct =
     goal.kind === "milestone" && goal.target > 0
-      ? Math.min(100, (current / goal.target) * 100)
+      ? Math.min(100, Math.max(0, (current / goal.target) * 100))
       : goal.kind === "checklist"
         ? (state.checklistStatus[goal.id] ?? "not-started") === "done"
           ? 100
@@ -367,6 +368,8 @@ export default function GoalDossierPage() {
           )}
         </div>
       </div>
+
+      {goal.id === "histoire-maroc" && <HistoireMarocBook />}
 
       {/* Dossier académique : contexte fixe à gauche, surfaces de travail à droite */}
       {"modules" in goal && goal.modules ? (

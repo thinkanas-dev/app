@@ -68,6 +68,14 @@ export type SessionLecture = {
   fin: string | null;
 };
 
+export type LectureLivre = {
+  joursTermines: number[];
+  morales: Record<string, string>;
+  dates: Record<string, string>;
+  souverainsTermines: number[];
+  notesSouverains: Record<string, string>;
+};
+
 /** Ce qu'on a compris d'une séance, en un coup d'œil */
 export type Comprehension = "clair" | "a-revoir" | "perdu";
 
@@ -127,6 +135,8 @@ export type ObjectifsState = {
   /** Le carnet du navigateur à intention */
   carnet: CarteSavoir[];
   lectures: SessionLecture[];
+  /** Parcours de lecture et découvertes historiques. */
+  lecturesLivres: Record<string, LectureLivre>;
   /** Carnets des séances de cours, par identifiant de séance */
   carnetsSeances: Record<string, CarnetSeance>;
   /** Couche personnelle entièrement configurable depuis l'Atelier. */
@@ -199,6 +209,7 @@ const defaultState: ObjectifsState = {
   semainesImportees: [],
   carnet: [],
   lectures: [],
+  lecturesLivres: {},
   carnetsSeances: {},
   atelier: atelierParDefaut,
 };
@@ -549,6 +560,85 @@ export function useObjectifsState() {
     }));
   }
 
+  const lectureLivreVide = (): LectureLivre => ({
+    joursTermines: [],
+    morales: {},
+    dates: {},
+    souverainsTermines: [],
+    notesSouverains: {},
+  });
+
+  function setMoraleLivre(livreId: string, jour: number, morale: string) {
+    setState((prev) => {
+      const lecture = prev.lecturesLivres[livreId] ?? lectureLivreVide();
+      return {
+        ...prev,
+        lecturesLivres: {
+          ...prev.lecturesLivres,
+          [livreId]: { ...lecture, morales: { ...lecture.morales, [jour]: morale } },
+        },
+      };
+    });
+  }
+
+  function basculerJourLivre(livreId: string, jour: number) {
+    setState((prev) => {
+      const lecture = prev.lecturesLivres[livreId] ?? lectureLivreVide();
+      const termine = lecture.joursTermines.includes(jour);
+      const dates = { ...lecture.dates };
+      if (termine) delete dates[jour];
+      else dates[jour] = new Date().toISOString();
+      return {
+        ...prev,
+        lecturesLivres: {
+          ...prev.lecturesLivres,
+          [livreId]: {
+            ...lecture,
+            joursTermines: termine
+              ? lecture.joursTermines.filter((item) => item !== jour)
+              : [...lecture.joursTermines, jour].sort((a, b) => a - b),
+            dates,
+          },
+        },
+      };
+    });
+  }
+
+  function setNoteSouverain(livreId: string, semaine: number, note: string) {
+    setState((prev) => {
+      const lecture = prev.lecturesLivres[livreId] ?? lectureLivreVide();
+      return {
+        ...prev,
+        lecturesLivres: {
+          ...prev.lecturesLivres,
+          [livreId]: {
+            ...lecture,
+            notesSouverains: { ...lecture.notesSouverains, [semaine]: note },
+          },
+        },
+      };
+    });
+  }
+
+  function basculerSouverain(livreId: string, semaine: number) {
+    setState((prev) => {
+      const lecture = prev.lecturesLivres[livreId] ?? lectureLivreVide();
+      const termine = lecture.souverainsTermines.includes(semaine);
+      return {
+        ...prev,
+        lecturesLivres: {
+          ...prev.lecturesLivres,
+          [livreId]: {
+            ...lecture,
+            souverainsTermines: termine
+              ? lecture.souverainsTermines.filter((item) => item !== semaine)
+              : [...lecture.souverainsTermines, semaine].sort((a, b) => a - b),
+          },
+        },
+      };
+    });
+  }
+
   /** Coche ou décoche une séance comme révisée à chaud. */
   function basculerSeanceRevisee(id: string) {
     setState((prev) => ({
@@ -712,6 +802,10 @@ export function useObjectifsState() {
     supprimerCarte,
     ouvrirLecture,
     fermerLecture,
+    setMoraleLivre,
+    basculerJourLivre,
+    setNoteSouverain,
+    basculerSouverain,
     ajouterAtelier,
     modifierAtelier,
     archiverAtelier,

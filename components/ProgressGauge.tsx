@@ -77,10 +77,12 @@ export function ProgressGauge({
         </p>
       </div>
       <div className="h-2 w-full rounded-full bg-surface-warm overflow-hidden mb-2">
-        <div
-          className={`h-full rounded-full transition-[width] duration-300 ${accentFill[accent]}`}
-          style={{ width: `${pct}%` }}
-        />
+        {pct > 0 && (
+          <div
+            className={`h-full rounded-full transition-[width] duration-300 ${accentFill[accent]}`}
+            style={{ width: `${pct}%` }}
+          />
+        )}
       </div>
       <div className="flex items-center justify-between gap-4">
         {note && <p className="font-sans text-xs text-text-muted">{note}</p>}

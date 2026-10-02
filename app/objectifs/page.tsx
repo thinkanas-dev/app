@@ -253,7 +253,7 @@ export default function ObjectifsOverviewPage() {
           <div className="divide-y divide-hairline">
             {objectifsContent.milestones.map((m) => {
               const current = state.milestoneCurrent[m.id] ?? 0;
-              const pct = Math.min(100, (current / m.target) * 100);
+              const pct = Math.min(100, Math.max(0, (current / m.target) * 100));
               const status = classifyStatus(pct, elapsedPct);
               const meta = statusMeta[status];
               return (
@@ -272,10 +272,12 @@ export default function ObjectifsOverviewPage() {
                   </div>
                   <div className="hidden sm:flex items-center gap-2 shrink-0">
                     <div className="w-20 h-1.5 rounded-full bg-surface-warm overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-brand transition-[width] duration-300"
-                        style={{ width: `${hydrated ? pct : 0}%` }}
-                      />
+                      {hydrated && pct > 0 && (
+                        <div
+                          className="h-full rounded-full bg-brand transition-[width] duration-300"
+                          style={{ width: `${pct}%` }}
+                        />
+                      )}
                     </div>
                     <span className="font-sans text-xs text-text-muted tabular-nums w-9 text-right">
                       {hydrated ? Math.round(pct) : 0}%

@@ -64,7 +64,7 @@ export default function ProgressionPage() {
   const rows = useMemo(() => {
     const mapped = objectifsContent.milestones.map((m) => {
       const current = state.milestoneCurrent[m.id] ?? (m.id === "patrimoine" ? -0.62 : 0);
-      const pct = m.target > 0 ? Math.min(100, (current / m.target) * 100) : 0;
+      const pct = m.target > 0 ? Math.min(100, Math.max(0, (current / m.target) * 100)) : 0;
       return {
         id: m.id,
         label: m.label,
@@ -80,7 +80,7 @@ export default function ProgressionPage() {
     });
 
     const personnalisés = state.atelier.objectifs.map((objectif) => {
-      const pct = objectif.cible > 0 ? Math.min(100, (objectif.valeur / objectif.cible) * 100) : 0;
+      const pct = objectif.cible > 0 ? Math.min(100, Math.max(0, (objectif.valeur / objectif.cible) * 100)) : 0;
       return {
         id: objectif.id,
         label: objectif.titre,
@@ -255,10 +255,12 @@ export default function ProgressionPage() {
 
                 <div className="hidden lg:flex items-center gap-2">
                   <div className="flex-1 h-1.5 rounded-full bg-surface-warm overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-brand transition-[width] duration-300"
-                      style={{ width: `${hydrated ? r.pct : 0}%` }}
-                    />
+                    {hydrated && r.pct > 0 && (
+                      <div
+                        className="h-full rounded-full bg-brand transition-[width] duration-300"
+                        style={{ width: `${r.pct}%` }}
+                      />
+                    )}
                   </div>
                   <span className="font-sans text-xs text-text-muted tabular-nums w-9 text-right">
                     {hydrated ? Math.round(r.pct) : 0}%
