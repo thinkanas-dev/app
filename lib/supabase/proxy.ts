@@ -7,7 +7,9 @@ const ACCES = "/acces";
 const DOMAINE_PUBLIC = "ouroboros.thinkanas.com";
 
 function adresseIp(request: NextRequest) {
-  const transmise = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  const transmise = (request.headers.get("x-vercel-forwarded-for") || request.headers.get("x-forwarded-for"))
+    ?.split(",")[0]
+    ?.trim();
   return (transmise || request.headers.get("x-real-ip") || "").replace(/^::ffff:/, "");
 }
 
