@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useObjectifsState } from "@/lib/objectifs-store";
 import { dateLocale, nouvelId, type CaptureAtelier, type NoteJourAtelier } from "@/lib/atelier";
+import { SouverainSemaine } from "@/components/SouverainSemaine";
 
 const inputClass = "w-full rounded-md border border-hairline bg-canvas px-3 py-2 font-sans text-sm text-ink outline-none focus:border-brand";
 const buttonClass = "rounded-md bg-brand px-4 py-2 font-sans text-sm font-semibold text-canvas hover:bg-brand-hover";
@@ -106,6 +107,8 @@ export default function AujourdhuiPage() {
           <button type="button" onClick={envoyerCapture} className={buttonClass}>Capturer</button>
         </div>
       </div>
+
+      <SouverainSemaine />
 
       <div className="grid gap-4 xl:grid-cols-2 items-start">
         {widgets.map((widget) => {
