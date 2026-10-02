@@ -1,7 +1,6 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   creerSessionPin,
   PIN_CONFIG_COOKIE,
@@ -102,9 +101,11 @@ export async function POST(request: Request) {
   }
 
   if (body?.action === "configurer") {
-    const supabase = await createSupabaseServerClient();
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) return NextResponse.json({ erreur: "Reconnectez votre compte privé avant de créer le PIN." }, { status: 401 });
+    const configurationExistante = cookieStore.get(PIN_CONFIG_COOKIE)?.value;
+    const sessionExistante = cookieStore.get(PIN_UNLOCK_COOKIE)?.value;
+    if (configurationExistante && !(await verifierSessionPin(secret, configurationExistante, sessionExistante))) {
+      return NextResponse.json({ erreur: "Déverrouillez d’abord l’app avant de modifier le PIN." }, { status: 401 });
+    }
 
     const configuration = chiffrerPin(pin, secret);
     cookieStore.set(PIN_CONFIG_COOKIE, configuration, { ...cookieOptions, maxAge: 365 * 24 * 60 * 60 });

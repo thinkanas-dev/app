@@ -3,21 +3,16 @@
 import Image from "next/image";
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient, supabaseConfigure } from "@/lib/supabase/client";
 
 const champ = "w-full rounded-md border border-hairline bg-canvas px-3 py-2.5 font-sans text-sm text-ink outline-none focus:border-brand";
 
 export default function AccesPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [motDePasse, setMotDePasse] = useState("");
   const [pin, setPin] = useState("");
   const [confirmationPin, setConfirmationPin] = useState("");
   const [pinConfigure, setPinConfigure] = useState<boolean | null>(null);
-  const [sessionInitiale, setSessionInitiale] = useState(false);
   const [enCours, setEnCours] = useState(false);
   const [message, setMessage] = useState("");
-  const configure = supabaseConfigure();
 
   useEffect(() => {
     void (async () => {
@@ -29,11 +24,6 @@ export default function AccesPage() {
         return;
       }
       setPinConfigure(Boolean(donnees?.configure));
-
-      const supabase = createSupabaseBrowserClient();
-      if (!supabase) return;
-      const resultat = await supabase.auth.getUser();
-      setSessionInitiale(Boolean(resultat.data.user));
     })();
   }, [router]);
 
@@ -79,35 +69,6 @@ export default function AccesPage() {
     }
   }
 
-  async function preparerPin(e: FormEvent) {
-    e.preventDefault();
-    const supabase = createSupabaseBrowserClient();
-    if (!supabase) return;
-    setEnCours(true);
-    setMessage("");
-
-    let resultat = await supabase.auth.signInWithPassword({ email, password: motDePasse });
-    if (resultat.error) {
-      resultat = await supabase.auth.signUp({
-        email,
-        password: motDePasse,
-        options: { emailRedirectTo: "https://ouroboros.thinkanas.com/acces" },
-      });
-    }
-    if (resultat.error) {
-      setMessage(resultat.error.message);
-      setEnCours(false);
-      return;
-    }
-    if (!resultat.data.session) {
-      setMessage("Confirmez l’adresse reçue par e-mail, puis revenez ici pour créer votre PIN.");
-      setEnCours(false);
-      return;
-    }
-    setSessionInitiale(true);
-    setEnCours(false);
-  }
-
   return (
     <main className="min-h-screen bg-[#f3dfb1] px-5 py-12 text-ink">
       <div className="mx-auto flex min-h-[calc(100vh-6rem)] max-w-md items-center">
@@ -126,25 +87,12 @@ export default function AccesPage() {
               <input required type="password" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} autoComplete="current-password" placeholder="PIN secret à 6 chiffres" className={`${champ} text-center text-xl tracking-[0.4em]`} value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))} />
               <button disabled={enCours} className="w-full rounded-md bg-brand px-4 py-3 font-sans text-sm font-semibold text-canvas disabled:opacity-50">{enCours ? "Ouverture…" : "Ouvrir l’app"}</button>
             </form>
-          ) : !configure ? (
-            <div className="mt-6 rounded-md border border-amber-400/50 bg-amber-50 p-3 font-sans text-sm text-amber-900">Configuration Supabase requise sur le déploiement Vercel.</div>
-          ) : sessionInitiale ? (
+          ) : (
             <form onSubmit={enregistrerPin} className="mt-7 flex flex-col gap-3">
               <input required type="password" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} autoComplete="new-password" placeholder="Choisissez 6 chiffres" className={`${champ} text-center text-xl tracking-[0.4em]`} value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))} />
               <input required type="password" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} autoComplete="new-password" placeholder="Confirmez le PIN" className={`${champ} text-center text-xl tracking-[0.4em]`} value={confirmationPin} onChange={(e) => setConfirmationPin(e.target.value.replace(/\D/g, "").slice(0, 6))} />
               <button disabled={enCours} className="w-full rounded-md bg-brand px-4 py-3 font-sans text-sm font-semibold text-canvas disabled:opacity-50">{enCours ? "Sécurisation…" : "Enregistrer mon PIN secret"}</button>
             </form>
-          ) : (
-            <>
-              <details open className="mt-7 border-t border-hairline pt-5">
-                <summary className="cursor-pointer font-sans text-sm text-text-muted">Configuration unique de cet appareil</summary>
-                <form onSubmit={preparerPin} className="mt-4 flex flex-col gap-3">
-                  <input required type="email" autoComplete="email" placeholder="Adresse e-mail privée" className={champ} value={email} onChange={(e) => setEmail(e.target.value)} />
-                  <input required type="password" minLength={8} autoComplete="current-password" placeholder="Mot de passe de secours" className={champ} value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} />
-                  <button disabled={enCours} className="rounded-md border border-brand px-4 py-2.5 font-sans text-sm font-semibold text-brand disabled:opacity-50">Continuer vers mon PIN</button>
-                </form>
-              </details>
-            </>
           )}
           {message && <p role="status" className="mt-4 rounded-md bg-panel px-3 py-2 font-sans text-sm text-ink">{message}</p>}
           <p className="mt-6 text-center font-sans text-[11px] text-text-muted">Domaine officiel : ouroboros.thinkanas.com</p>
