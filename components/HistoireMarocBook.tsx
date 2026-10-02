@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { IconBook } from "@/components/icons";
+import { LecteurPdfPrive } from "@/components/LecteurPdfPrive";
 import { useObjectifsState } from "@/lib/objectifs-store";
 
 const LIVRE_ID = "histoire-maroc-michel-abitbol";
@@ -134,7 +135,7 @@ export function HistoireMarocBook() {
               <div><p className="font-sans text-xs font-medium text-text-muted">Séance {jourActif} sur {TOTAL_JOURS}</p><h3 className="mt-1 font-serif text-2xl text-ink">Pages {plage.debut} à {plage.fin}</h3><p className="mt-1 font-sans text-xs text-text-muted">Environ 30 à 40 minutes de lecture attentive</p></div>
               <button type="button" onClick={() => setLecteurOuvert((ouvert) => !ouvert)} className="rounded-md bg-brand px-4 py-2.5 font-sans text-sm font-semibold text-canvas transition-colors hover:bg-brand-hover">{lecteurOuvert ? "Fermer le lecteur" : "Lire maintenant"}</button>
             </div>
-            {lecteurOuvert && <div className="mt-5 overflow-hidden rounded-lg border border-hairline bg-surface-secondary"><iframe title={`Histoire du Maroc — pages ${plage.debut} à ${plage.fin}`} src={`/api/livres/histoire-maroc#page=${plage.debut}&zoom=page-width`} className="h-[72vh] min-h-[560px] w-full" /><div className="flex flex-wrap items-center justify-between gap-2 border-t border-hairline px-3 py-2"><p className="font-sans text-xs text-text-muted">Document privé, déchiffré uniquement pour cette lecture.</p><a href={`/api/livres/histoire-maroc#page=${plage.debut}`} target="_blank" rel="noreferrer" className="font-sans text-xs font-semibold text-brand hover:underline">Plein écran ↗</a></div></div>}
+            {lecteurOuvert && <LecteurPdfPrive debut={plage.debut} fin={plage.fin} />}
             <div className="mt-5 rounded-lg border border-hairline bg-surface-secondary p-4">
               <label htmlFor="morale-histoire-maroc" className="font-sans text-sm font-semibold text-ink">Morale ou leçon retenue</label>
               <p className="mt-1 font-sans text-xs leading-5 text-text-muted">Qu’est-ce que cette période vous apprend sur le pouvoir, la société ou les choix collectifs ?</p>
