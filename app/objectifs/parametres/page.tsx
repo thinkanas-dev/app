@@ -6,8 +6,6 @@ import { Avatar } from "@/components/Avatar";
 import { InstagramIcon, TikTokIcon, LinkedInIcon } from "@/components/brand-icons";
 import { useObjectifsState } from "@/lib/objectifs-store";
 import { creerSauvegarde, lireSauvegarde, telechargerSauvegarde } from "@/lib/backup";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { enregistrerWindowsHello } from "@/lib/platform-passkeys";
 
 /** Recadre au centre et compresse la photo avant stockage local */
 function resizeImage(file: File, target = 320): Promise<string> {
@@ -84,6 +82,8 @@ export default function ParametresPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
+  const [nouveauPin, setNouveauPin] = useState("");
+  const [confirmationPin, setConfirmationPin] = useState("");
 
   async function onPickFile(file: File | undefined) {
     if (!file) return;
@@ -140,18 +140,29 @@ export default function ParametresPage() {
     setBackupStatus(permission === "granted" ? "Notifications Windows activées." : "Notifications non autorisées.");
   }
 
-  async function ajouterEmpreinte() {
-    const supabase = createSupabaseBrowserClient();
-    if (!supabase) return setBackupStatus("Supabase n’est pas encore configuré.");
+  async function changerPin() {
+    if (nouveauPin !== confirmationPin) return setBackupStatus("Les deux PIN ne correspondent pas.");
     setBusy(true);
-    const { error } = await enregistrerWindowsHello(supabase);
-    setBackupStatus(error ? error.message : "Nouvel accès Windows Hello ajouté.");
+    const reponse = await fetch("/api/pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "configurer", pin: nouveauPin }),
+    });
+    const resultat = (await reponse.json().catch(() => null)) as { erreur?: string } | null;
+    setBackupStatus(reponse.ok ? "PIN secret modifié." : resultat?.erreur || "Le PIN n’a pas pu être modifié.");
+    if (reponse.ok) {
+      setNouveauPin("");
+      setConfirmationPin("");
+    }
     setBusy(false);
   }
 
   async function verrouiller() {
-    const supabase = createSupabaseBrowserClient();
-    await supabase?.auth.signOut();
+    await fetch("/api/pin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "verrouiller" }),
+    });
     router.replace("/acces");
     router.refresh();
   }
@@ -283,10 +294,14 @@ export default function ParametresPage() {
       </div>
 
       <div className="rounded-lg border border-hairline bg-canvas p-5">
-        <h2 className="font-sans font-semibold text-base text-ink mb-1">Sécurité biométrique</h2>
-        <p className="font-sans text-sm text-text-muted mb-4">Ajoutez le capteur biométrique intégré de cet ordinateur avec Windows Hello. Verrouiller exige une nouvelle vérification.</p>
+        <h2 className="font-sans font-semibold text-base text-ink mb-1">PIN secret</h2>
+        <p className="font-sans text-sm text-text-muted mb-4">Changez les six chiffres qui protègent cet appareil. Le PIN n’est jamais affiché ni conservé en clair.</p>
+        <div className="grid gap-3 sm:grid-cols-2 mb-3">
+          <input required type="password" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} autoComplete="new-password" placeholder="Nouveau PIN à 6 chiffres" className="rounded-md border border-hairline bg-canvas px-3 py-2 font-sans text-sm outline-none focus:border-brand" value={nouveauPin} onChange={(e) => setNouveauPin(e.target.value.replace(/\D/g, "").slice(0, 6))} />
+          <input required type="password" inputMode="numeric" pattern="[0-9]{6}" minLength={6} maxLength={6} autoComplete="new-password" placeholder="Confirmer le PIN" className="rounded-md border border-hairline bg-canvas px-3 py-2 font-sans text-sm outline-none focus:border-brand" value={confirmationPin} onChange={(e) => setConfirmationPin(e.target.value.replace(/\D/g, "").slice(0, 6))} />
+        </div>
         <div className="flex gap-2 flex-wrap">
-          <button type="button" disabled={busy} onClick={() => void ajouterEmpreinte()} className="rounded-md bg-brand px-4 py-2 font-sans text-sm font-medium text-canvas disabled:opacity-60">Ajouter une empreinte</button>
+          <button type="button" disabled={busy || nouveauPin.length !== 6 || confirmationPin.length !== 6} onClick={() => void changerPin()} className="rounded-md bg-brand px-4 py-2 font-sans text-sm font-medium text-canvas disabled:opacity-60">Changer le PIN</button>
           <button type="button" onClick={() => void verrouiller()} className="rounded-md border border-hairline px-4 py-2 font-sans text-sm text-text-muted hover:text-ink">Verrouiller maintenant</button>
         </div>
       </div>

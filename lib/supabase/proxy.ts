@@ -1,9 +1,15 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { PIN_CONFIG_COOKIE, PIN_UNLOCK_COOKIE, verifierSessionPin } from "@/lib/pin-session";
 
 const PRIVE = "/objectifs";
 const ACCES = "/acces";
 const DOMAINE_PUBLIC = "ouroboros.thinkanas.com";
+
+function adresseIp(request: NextRequest) {
+  const transmise = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+  return (transmise || request.headers.get("x-real-ip") || "").replace(/^::ffff:/, "");
+}
 
 export async function updateSession(request: NextRequest) {
   const host = request.headers.get("host")?.split(":")[0] ?? "";
@@ -13,6 +19,14 @@ export async function updateSession(request: NextRequest) {
     destination.protocol = "https:";
     destination.host = DOMAINE_PUBLIC;
     return NextResponse.redirect(destination, 308);
+  }
+
+  const ipAutorisee = process.env.APP_ALLOWED_IP?.trim();
+  if (process.env.VERCEL_ENV === "production" && ipAutorisee && adresseIp(request) !== ipAutorisee) {
+    return new NextResponse(null, {
+      status: 404,
+      headers: { "Cache-Control": "no-store, max-age=0" },
+    });
   }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -40,11 +54,12 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims as { sub?: string; amr?: Array<{ method?: string }> } | undefined;
-  const methodeForte = claims?.amr?.some(({ method }) => method === "passkey" || method === "webauthn") ?? false;
-  const connecte = Boolean(claims?.sub && methodeForte);
+  await supabase.auth.getClaims();
   const chemin = request.nextUrl.pathname;
+  const configurationPin = request.cookies.get(PIN_CONFIG_COOKIE)?.value;
+  const sessionPin = request.cookies.get(PIN_UNLOCK_COOKIE)?.value;
+  const connecte = await verifierSessionPin(process.env.APP_PIN_SECRET ?? "", configurationPin, sessionPin);
+  const endpointPin = chemin === "/api/pin";
 
   if (chemin === "/") {
     const destination = connecte
@@ -56,8 +71,8 @@ export async function updateSession(request: NextRequest) {
     return redirection;
   }
 
-  if (!connecte && chemin.startsWith("/api/")) {
-    const refus = NextResponse.json({ erreur: "Vérification biométrique requise." }, { status: 401 });
+  if (!connecte && chemin.startsWith("/api/") && !endpointPin) {
+    const refus = NextResponse.json({ erreur: "PIN secret requis." }, { status: 401 });
     response.cookies.getAll().forEach((cookie) => refus.cookies.set(cookie));
     return refus;
   }
